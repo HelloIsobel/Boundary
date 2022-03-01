@@ -1,5 +1,5 @@
-from Final.new_unet_model import U_net
-from Final.dataset import ISBI_Loader
+from model.new_unet_model import U_net
+from model.dataset import ISBI_Loader
 from torch import optim
 import torch.nn as nn
 import torch
@@ -25,7 +25,6 @@ def evaluate_loss_acc(data_iter, net, device):
             n += y.shape[0]
     net.train(is_training)  # 恢复net的train/eval状态
     # return l_sum / n, acc_sum / n
-    print("You are pig!!!")
     return l_sum / n
 
 
@@ -56,7 +55,7 @@ def train_net(net, device, data_path, val_path, epochs=100, batch_size=1, lr=0.0
                                              shuffle=True)
 
     net.to(device=device)
-    # print("training on ", device)
+    print("training on ", device)
 
     # # 定义RMSprop算法
     optimizer = optim.RMSprop(net.parameters(), lr=lr, weight_decay=1e-8, momentum=0.9)  # 原来
@@ -84,7 +83,7 @@ def train_net(net, device, data_path, val_path, epochs=100, batch_size=1, lr=0.0
             # 保存loss值最小的网络参数
             if loss < best_loss:
                 best_loss = loss
-                torch.save(net.state_dict(), '0218_bestmodel.pth')
+                torch.save(net.state_dict(), '0218_bestmodel.pth')  # TODO: 最优模型名字
 
             optimizer.zero_grad()
             loss.backward()

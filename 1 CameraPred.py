@@ -1,4 +1,3 @@
-import glob
 import numpy as np
 import torch
 import os
@@ -19,27 +18,27 @@ if __name__ == "__main__":
     net.load_state_dict(torch.load('resize_1_2_bestmodel.pth', map_location=device))
     # 测试模式
     net.eval()
-    # 读取所有图片路径
-    path = glob.glob('data/all_train_test/*.jpg')
-    save_res_dirpath = 'data/result_local'
+
+    # 打开摄像头
+    cap = cv2.VideoCapture(1)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1024)
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+    cap.set(cv2.CAP_PROP_FPS, 30)
+    size = (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
+
+    save_res_dirpath = 'data/camera/'
     if not os.path.exists(save_res_dirpath):
         os.mkdir(save_res_dirpath)
 
     i = 0
-    # 遍历所有图片
     runningtime = []
-    acc_excelpath = 'data/runningtime.csv'
-    for img_path in path:
-        # 保存结果地址
-        save_res_path = img_path.replace("all_train_test", "result_local")
-        # 读取图片
-        img_src = cv2.imread(img_path)
-
+    runningtime_excelpath = save_res_dirpath+'camera_runningtime.csv'
+    while cap.isOpened():
         start = time.perf_counter()
-        shape = img_src.shape
+        ret, img_src = cap.read()
         # 改变图片大小
+        shape = img_src.shape
         img_src = cv2.resize(img_src, (int(shape[1]/2), int(shape[0]/2)))
-
         # 转为灰度图
         img = cv2.cvtColor(img_src, cv2.COLOR_RGB2GRAY)
         # 转为batch为1，通道为1，大小为512*512的数组
@@ -49,12 +48,12 @@ if __name__ == "__main__":
         # 将tensor拷贝到device中，只用cpu就是拷贝到cpu中，用cuda就是拷贝到cuda中。
         img_tensor = img_tensor.to(device=device, dtype=torch.float32)
         # 预测
-
         pred = net(img_tensor)
         end = time.perf_counter()
 
         runningtime.append(end - start)
-        print("final is in ", end - start)
+        print("the num of image is :", i)
+        print("runningtime is :", end - start)
 
         # 提取结果
         pred = np.array(pred.data.cpu()[0])[0]
@@ -68,12 +67,16 @@ if __name__ == "__main__":
         # opening = cv2.morphologyEx(pred, cv2.MORPH_CLOSE, kernel)  # 先腐蚀再膨胀 这里对应闭运算
 
         # 保存图片
-        # i = i + 1
-        cv2.imwrite(save_res_path, pred)
-        print(1)
+        cv2.imwrite(save_res_dirpath+"{}.jpg".format(i), pred)
+        i = i + 1
+
+        cv2.imshow("capture", pred)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
 
     end1 = time.perf_counter()
-    print("all final is in ", end1 - start1)
+    runningtime.append(end1 - start1)
+    print("all running time is : ", end1 - start1)
 
     data = pd.DataFrame(runningtime)
-    data.to_csv('data/runningtime.csv')
+    data.to_csv(runningtime_excelpath)

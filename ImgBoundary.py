@@ -1,6 +1,3 @@
-'''
-目标区域变成红色透明化
-'''
 import cv2
 import os
 import numpy as np
