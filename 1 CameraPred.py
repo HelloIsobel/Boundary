@@ -5,6 +5,8 @@ import cv2
 import time
 import pandas as pd
 from model.new_unet_model import U_net
+import argparse
+
 
 if __name__ == "__main__":
     start1 = time.perf_counter()  # 总时间
@@ -25,6 +27,10 @@ if __name__ == "__main__":
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
     cap.set(cv2.CAP_PROP_FPS, 30)
     size = (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
+
+    fps = 30
+    fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+    videoWriter = cv2.VideoWriter("video_no_argparse.avi", fourcc, fps, (640, 512))
 
     save_res_dirpath = 'data/camera/'
     if not os.path.exists(save_res_dirpath):
@@ -65,12 +71,15 @@ if __name__ == "__main__":
         # # 膨胀和腐蚀反着来（因为本来前景是白色，但是我们这里是黑色）
         # kernel = np.ones((5, 5), np.uint8)
         # opening = cv2.morphologyEx(pred, cv2.MORPH_CLOSE, kernel)  # 先腐蚀再膨胀 这里对应闭运算
+        image = cv2.cvtColor(pred, cv2.COLOR_GRAY2RGB)
+        print("pred image shape is :{},{}".format(image.shape[1], image.shape[0]))
 
+        videoWriter.write(image)
         # 保存图片
-        cv2.imwrite(save_res_dirpath+"{}.jpg".format(i), pred)
+        cv2.imwrite(save_res_dirpath+"{}.jpg".format(i), image)
         i = i + 1
 
-        cv2.imshow("capture", pred)
+        cv2.imshow("capture", image)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 

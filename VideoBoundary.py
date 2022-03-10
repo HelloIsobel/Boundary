@@ -5,7 +5,7 @@ import random
 import math
 import os
 import time
-from Final.new_unet_model import U_net
+from model.new_unet_model import U_net
 
 
 def fit_line_by_ransac(point_list, sigma, iters=50, P=0.99):
@@ -98,7 +98,7 @@ if __name__ == "__main__":
     # 将网络拷贝到deivce中
     net.to(device=device)
     # 加载模型参数
-    net.load_state_dict(torch.load('0218_bestmodel.pth', map_location=device))
+    net.load_state_dict(torch.load('resize_1_2_bestmodel.pth', map_location=device))
     # 测试模式
     net.eval()
 

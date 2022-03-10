@@ -3,7 +3,7 @@ from model.dataset import ISBI_Loader
 from torch import optim
 import torch.nn as nn
 import torch
-from tool.value2excel import getExcel
+from tool.functions import getExcel
 import time
 import cv2
 

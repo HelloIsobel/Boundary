@@ -21,23 +21,29 @@ def pred():
     # 测试模式
     net.eval()
 
-    # 打开摄像头
+    # 打开摄像头：保证输入时是大角度的视野
     cap = cv2.VideoCapture(1)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1024)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
     cap.set(cv2.CAP_PROP_FPS, 30)
-    size = (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
+    # img_size = (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
+    size = (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)/2), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)/2))
 
-    if not os.path.exists(args.save_pred_dirpath):
-        os.mkdir(args.save_pred_dirpath)
+    if not os.path.exists(args.save_pred):
+        os.makedirs(args.save_pred)
+
+    # 帧率
+    fps = 30
+    fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+    videoWriter = cv2.VideoWriter(args.save_video, fourcc, fps, size)
 
     i = 0
     runningtime = []
-    runningtime_excelpath = args.save_pred_dirpath + 'camera_runningtime.csv'
+    runningtime_excelpath = args.save_pred + 'camera_runningtime.csv'
     while cap.isOpened():
         start = time.perf_counter()
         ret, img_src = cap.read()
-        # 改变图片大小
+        # 改变图片大小，双线性插值让图像变小
         shape = img_src.shape
         img_src = cv2.resize(img_src, (int(shape[1] / 2), int(shape[0] / 2)))
         # 转为灰度图
@@ -62,11 +68,15 @@ def pred():
         pred[pred >= 0.5] = 255
         pred[pred < 0.5] = 0
 
+        frame=cv2.cvtColor(pred, cv2.COLOR_GRAY2RGB)
         # 保存图片
-        cv2.imwrite(args.save_pred_dirpath + "{}.jpg".format(i), pred)
-        i = i + 1
+        cv2.imwrite(args.save_pred + "{}.jpg".format(i), frame)
+        frame=cv2.imread(args.save_pred + "{}.jpg".format(i))
+        # 保存视频
+        videoWriter.write(frame)
 
-        cv2.imshow("capture", pred)
+        i = i + 1
+        cv2.imshow("capture", frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
@@ -77,12 +87,18 @@ def pred():
     data = pd.DataFrame(runningtime)
     data.to_csv(runningtime_excelpath)
 
+    cap.release()
+    videoWriter.release()
+    cv2.destroyAllWindows()
+
 
 if __name__ == "__main__":
+    time_str = time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime())
     parser = argparse.ArgumentParser(description="Segment farmland area and non-farmland area.")
     parser.add_argument("--bestmodel", type=str, metavar="", default="resize_1_2_bestmodel.pth",
                         help="Save a bestmodel")
-    parser.add_argument("--save_pred_dirpath", metavar="", type=str, default="data/camera/", help="Save pred images")
+    parser.add_argument("--save_pred", metavar="", type=str, default="data/"+time_str+"/camera/", help="Save pred images")
+    parser.add_argument("--save_video", metavar="", type=str, default="data/"+time_str+"/video.avi", help="Save video")
     args = parser.parse_args()
     print(args)
     pred()
