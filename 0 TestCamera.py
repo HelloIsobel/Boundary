@@ -15,7 +15,7 @@ videoWriter = cv2.VideoWriter("video.avi", fourcc, fps, size)
 
 while cap.isOpened():
     ret, frame = cap.read()
-    # img_src = cv2.resize(frame, (int(frame.shape[1]/2), int(frame.shape[0]/2)))
+    # frame = cv2.resize(frame, (int(frame.shape[1]/2), int(frame.shape[0]/2)))
     videoWriter.write(frame)
     cv2.imshow("test", frame)
 

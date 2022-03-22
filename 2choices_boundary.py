@@ -12,6 +12,7 @@ from tool.functions import get_maxContour
 
 
 def DecectBoundary():
+    global videoWriter
     start0 = time.perf_counter()  # 总时间
     # ***************** 神经网络搭建 ***************** #
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -31,26 +32,36 @@ def DecectBoundary():
         cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1024)
         cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
         cap.set(cv2.CAP_PROP_FPS, 30)
-        # size = (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH) / 2), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) / 2))
+        size = (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH) / 2), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) / 2))
     else:
-        cap = cv2.VideoCapture(args.open_video)  # TODO：修改video名
+        cap = cv2.VideoCapture(args.open_video)
+        size = (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH) / 2), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) / 2))
 
     # # ***************** 保存视频 ***************** #
-    # # 帧率
-    # fps = 30
-    # fourcc = cv2.VideoWriter_fourcc(*'MJPG')
-    # videoWriter = cv2.VideoWriter("video.avi", fourcc, fps, size)
+    # 帧率
+    if args.saveVideoOpen:
+        fps = 30
+        fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+        videoWriter = cv2.VideoWriter(args.save_video, fourcc, fps, size)
 
-    # ***************** 帧处理 ***************** #
+    # ***************** 初始化 ***************** #
     flag, flag2 = 0, 0  # 判断是否使用扩展检测边界线法
     a, b, a2, b2 = 0, 0, 0, 0  # 检测直线的斜率和截距
+
+    frame_dir = args.save_dirpath + "frame/"
+    if not os.path.exists(frame_dir):
+        os.makedirs(frame_dir)
 
     candidateBoundary_dir = args.save_dirpath + "candidateBoundary/"
     if not os.path.exists(candidateBoundary_dir):
         os.makedirs(candidateBoundary_dir)
 
+    Boundary_dir = args.save_dirpath + "Boundary/"
+    if not os.path.exists(Boundary_dir):
+        os.makedirs(Boundary_dir)
+
     runningtime = []
-    runningtime_excelpath = args.save_dirpath + 'camera_runningtime.csv'
+    runningtime_excelpath = args.save_dirpath + 'runningtime.csv'
 
     i = 0  # 每一帧命名
     # ***************** 帧处理 ***************** #
@@ -59,8 +70,6 @@ def DecectBoundary():
         start = time.perf_counter()
         # 转为灰度图
         img_resize = cv2.resize(frame, (int(frame.shape[1] / 2), int(frame.shape[0] / 2)))
-        # copyimg = np.zeros(frame.shape, np.uint8)
-        # copyimg = frame.copy()
         w = img_resize.shape[1]
 
         img = cv2.cvtColor(img_resize, cv2.COLOR_RGB2GRAY)
@@ -104,6 +113,7 @@ def DecectBoundary():
             cv2.circle(img_resize, (int(coor[0]), int(coor[1])), 1, (0, 255, 0), 4)  # ( 0, 255, 255)  (255, 0, 0)
 
         # 保存地址
+        cv2.imwrite(frame_dir + '{}.jpg'.format(i), frame)
         cv2.imwrite(candidateBoundary_dir + '{}.jpg'.format(i), img_resize)
 
         # ******************************** 检测边界线 ******************************* #
@@ -171,15 +181,14 @@ def DecectBoundary():
 
         end = time.perf_counter()
         runningtime.append(end - start)
-        print("the num of image is :", i)
-        print("runningtime is :", end - start)
+        print("the runningtime of [ {} ] image is: {}".format(i, end - start))
 
         # ********** 作图 ********** #
-        Boundary_dir = args.save_dirpath + "Boundary/"
-        if not os.path.exists(Boundary_dir):
-            os.makedirs(Boundary_dir)
-
         cv2.imwrite(Boundary_dir + '{}.jpg'.format(i), img_resize)
+
+        if args.saveVideoOpen:
+            img_try = cv2.imread(Boundary_dir + '{}.jpg'.format(i))
+            videoWriter.write(img_try)
 
         i = i + 1
 
@@ -195,23 +204,28 @@ def DecectBoundary():
     data.to_csv(runningtime_excelpath)
 
     cap.release()
-    # videoWriter.release()
+    videoWriter.release()
     cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":
     time_str = time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime())
     parser = argparse.ArgumentParser(description="Segment farmland area and non-farmland area.")
-    parser.add_argument("--bestmodel", type=str, metavar="", default="resize_1_2_bestmodel.pth",
+    parser.add_argument("--bestmodel", type=str, metavar="", default="data/376_bestmodel.pth",
                         help="Save a bestmodel")
     parser.add_argument("--T_contour_area", type=int, metavar="", default=10000, help="二值分割后，轮廓面积最小阈值")
     parser.add_argument("--T_area", type=int, metavar="", default=15000, help="第二条线，顶端田埂面积阈值")
     parser.add_argument("--extend_w", type=int, metavar="", default=50, help="扩展宽度")
-    parser.add_argument("--save_dirpath", type=str, metavar="", default="data/result/"+time_str+"/", help="Save images")
-    parser.add_argument("--save_video", metavar="", type=str, default="data/result/"+time_str+"/video.avi", help="Save video")
-    parser.add_argument("--capOpen", metavar="", type=str, default=False, help="open cap")
-    # parser.add_argument("--videoOpen", metavar="", type=str, default=True, help="open video")
-    parser.add_argument("--open_video", metavar="", type=str, default="data/video/yk01.avi", help="Open video")
+    parser.add_argument("--save_dirpath", type=str, metavar="", default="data/result/" + time_str + "/",
+                        help="Save images")
+    # TODO:决定保存视频还是不保存
+    parser.add_argument("--saveVideoOpen", metavar="", type=str, default=False, help="save video open")
+    parser.add_argument("--save_video", metavar="", type=str, default="data/result/" + time_str + "/boundaryVideo.avi",
+                        help="Save video")
+    # TODO:决定用相机还是已有视频
+    parser.add_argument("--capOpen", metavar="", type=str, default=True, help="open cap")
+    parser.add_argument("--open_video", metavar="", type=str, default="data/video/video_fuyang.avi",
+                        help="Open video and print path of video")
 
     args = parser.parse_args()
     print(args)
