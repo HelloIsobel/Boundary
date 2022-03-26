@@ -85,8 +85,8 @@ def get_maxContour(bw, T_contour_area):
             max_edge = np.squeeze(contours[max_area_index])
             index = np.argwhere(max_edge[:, 1] == 0)
             index = np.append(index, np.argwhere(max_edge[:, 0] == 0))
-            index = np.append(index, np.argwhere(max_edge[:, 0] == bw.shape[1] - 1))
-            index = np.append(index, np.argwhere(max_edge[:, 1] == bw.shape[0] - 1))
+            index = np.append(index, np.argwhere(max_edge[:, 0] == bw.shape[1] - 1))  # shape[0]=h shape[1]=w
+            index = np.append(index, np.argwhere(max_edge[:, 1] == bw.shape[0] - 1))  # max_edge[:, 0]=x max_edge[:, 1]=y
             index = np.append(np.sort(index), [len(max_edge) - 1])
             index_sub = np.array([0])
             index_sub = np.append(index_sub, index[0:-1])  # 这里是倒数第二个

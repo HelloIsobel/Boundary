@@ -11,7 +11,7 @@ size = (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_H
 
 fps = 30
 fourcc = cv2.VideoWriter_fourcc(*'MJPG')
-videoWriter = cv2.VideoWriter("video.avi", fourcc, fps, size)
+videoWriter = cv2.VideoWriter("video_20220323_1733.avi", fourcc, fps, size)
 
 while cap.isOpened():
     ret, frame = cap.read()
