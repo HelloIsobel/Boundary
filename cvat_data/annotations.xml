@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<annotations>
+  <version>1.1</version>
+  <meta>
+    <task>
+      <id>41</id>
+      <name>task1</name>
+      <size>7</size>
+      <mode>interpolation</mode>
+      <overlap>0</overlap>
+      <bugtracker></bugtracker>
+      <created>2022-03-23 12:59:49.806489+00:00</created>
+      <updated>2022-03-23 13:02:14.515343+00:00</updated>
+      <subset>Train</subset>
+      <start_frame>0</start_frame>
+      <stop_frame>180</stop_frame>
+      <frame_filter>step=30</frame_filter>
+      <segments>
+        <segment>
+          <id>96</id>
+          <start>0</start>
+          <stop>6</stop>
+          <url>http://101.37.163.116:6701/?id=96</url>
+        </segment>
+      </segments>
+      <owner>
+        <username>SiaIsobel</username>
+        <email>isobel303620@126.com</email>
+      </owner>
+      <assignee></assignee>
+      <labels>
+        <label>
+          <name>non-farmland</name>
+          <color>#1ad660</color>
+          <attributes>
+          </attributes>
+        </label>
+      </labels>
+      <original_size>
+        <width>1280</width>
+        <height>1024</height>
+      </original_size>
+    </task>
+    <dumped>2022-03-26 07:46:17.432862+00:00</dumped>
+    <source>video.avi</source>
+  </meta>
+  <image id="0" name="frame_000000" width="1280" height="1024">
+    <polygon label="non-farmland" occluded="0" source="manual" points="65.54,1021.12;603.28,0.00;22.97,0.00;0.00,0.06;0.00,1024.00;59.30,1024.00;60.97,1021.86" z_order="0">
+    </polygon>
+  </image>
+  <image id="30" name="frame_000030" width="1280" height="1024">
+    <polygon label="non-farmland" occluded="0" source="manual" points="65.54,1021.12;603.28,0.00;22.97,0.00;0.00,0.06;0.00,1024.00;59.30,1024.00;60.97,1021.86" z_order="0">
+    </polygon>
+  </image>
+  <image id="60" name="frame_000060" width="1280" height="1024">
+    <polygon label="non-farmland" occluded="0" source="manual" points="65.54,1021.12;603.28,0.00;22.97,0.00;0.00,0.06;0.00,1024.00;59.30,1024.00;60.97,1021.86" z_order="0">
+    </polygon>
+  </image>
+  <image id="90" name="frame_000090" width="1280" height="1024">
+    <polygon label="non-farmland" occluded="0" source="manual" points="65.54,1021.12;603.28,0.00;22.97,0.00;0.00,0.06;0.00,1024.00;59.30,1024.00;60.97,1021.86" z_order="0">
+    </polygon>
+  </image>
+  <image id="120" name="frame_000120" width="1280" height="1024">
+    <polygon label="non-farmland" occluded="0" source="manual" points="65.54,1021.12;603.28,0.00;22.97,0.00;0.00,0.06;0.00,1024.00;59.30,1024.00;60.97,1021.86" z_order="0">
+    </polygon>
+  </image>
+  <image id="150" name="frame_000150" width="1280" height="1024">
+    <polygon label="non-farmland" occluded="0" source="manual" points="65.54,1021.12;603.28,0.00;22.97,0.00;0.00,0.06;0.00,1024.00;59.30,1024.00;60.97,1021.86" z_order="0">
+    </polygon>
+  </image>
+  <image id="180" name="frame_000180" width="1280" height="1024">
+    <polygon label="non-farmland" occluded="0" source="manual" points="65.54,1021.12;603.28,0.00;22.97,0.00;0.00,0.06;0.00,1024.00;59.30,1024.00;60.97,1021.86" z_order="0">
+    </polygon>
+  </image>
+</annotations>

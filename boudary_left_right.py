@@ -64,6 +64,9 @@ def DecectBoundary():
     runningtime = []
     runningtime_excelpath = args.save_dirpath + 'runningtime.csv'
 
+    predtime = []
+    predtime_excelpath = args.save_dirpath + 'predtime.csv'
+
     i = 0  # 每一帧命名
     # ***************** 帧处理 ***************** #
     while cap.isOpened():
@@ -81,7 +84,13 @@ def DecectBoundary():
         # 将tensor拷贝到device中，只用cpu就是拷贝到cpu中，用cuda就是拷贝到cuda中。
         img_tensor = img_tensor.to(device=device, dtype=torch.float32)
         # 预测
+        start01 = time.perf_counter()
         pred = net(img_tensor)
+        end01 = time.perf_counter()
+
+        predtime.append(end01 - start01)
+        print("the predtime of [ {} ] image is: {}".format(i, end01 - start01))
+
         # 提取结果
         pred = np.array(pred.data.cpu()[0])[0]
         # 处理结果
@@ -210,6 +219,9 @@ def DecectBoundary():
         runningtime.append(end - start)
         print("the runningtime of [ {} ] image is: {}".format(i, end - start))
 
+
+
+
         # ********** 作图 ********** #
         cv2.imwrite(Boundary_dir + '{}.jpg'.format(i), img_resize)
 
@@ -229,6 +241,9 @@ def DecectBoundary():
 
     data = pd.DataFrame(runningtime)
     data.to_csv(runningtime_excelpath)
+
+    data01 = pd.DataFrame(predtime)
+    data01.to_csv(predtime_excelpath)
 
     cap.release()
     videoWriter.release()
